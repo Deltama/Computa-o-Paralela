@@ -8,4 +8,43 @@ o processo pai realiza uma outra operação (por exemplo, multiplicação - valo
 Essa lógica de execução deve ser garantida no seu código-fonte em C.
 */
 
+//Matheus Oliveira Bitencourt 32170157 05N11
+#include  <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/shm.h>
 
+
+int main()
+{
+    pid_t childpid;
+    pid_t parentid;
+    int shm_id;
+
+    shm_id = shmget(IPC_PRIVATE, 1024, IPC_CREAT |  0660);
+    if (shm_id < 0) printf("shmget error\n");
+
+    int *compartilhada = (int*)shmat(shm_id, NULL, 0);
+
+    *compartilhada = 1;
+
+    printf("valor inicial %i\n",*compartilhada);
+
+    parentid = getppid();
+    printf("parent %i\n",parentid);
+
+    childpid = fork();
+    printf("childpid %i\n",childpid);
+
+    if (childpid == 0)
+    {
+        *compartilhada += 2;
+        printf("variavel compartilhada ao somar 2 = %i\n",*compartilhada);
+    }
+    else
+    {
+        *compartilhada *= 4 ;
+        printf("variavel compartilhada ao multiplicar 4 = %i\n",*compartilhada);
+    }
+    return 0;
+}
